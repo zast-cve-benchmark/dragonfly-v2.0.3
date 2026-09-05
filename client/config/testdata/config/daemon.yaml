@@ -1,0 +1,103 @@
+aliveTime: 0s
+gcInterval: 1m0s
+workHome: /tmp/dragonfly/dfdaemon/
+dataDir: /var/lib/dragonfly/
+logDir: /var/log/dragonfly/
+cacheDir: /var/cache/dragonfly/
+keepStorage: false
+scheduler:
+  manager:
+    enable: false
+    netAddrs:
+      - type: tcp
+        addr: 127.0.0.1:65003
+    refreshInterval: 5m
+    seedPeer:
+      enable: false
+      type: strong
+      clusterID: 2
+      keepAlive:
+        interval: 10s
+  netAddrs:
+    - type: tcp
+      addr: 127.0.0.1:8002
+  scheduleTimeout: 0
+
+host:
+  hostname: d7y.io
+  listenIP: 0.0.0.0
+  advertiseIP: 0.0.0.0
+  location: 0.0.0.0
+  idc: d7y
+  securityDomain: d7y.io
+  netTopology: d7y
+
+download:
+  pieceDownloadTimeout: 30s
+  totalRateLimit: 200Mi
+  perPeerRateLimit: 20Mi
+  downloadGRPC:
+    security:
+      insecure: true
+      caCert: caCert
+      cert: cert
+      key: key
+      tlsVerify: true
+      tlsConfig: null
+    unixListen:
+      socket: /tmp/dfdaemon.sock
+  peerGRPC:
+    security:
+      insecure: true
+      caCert: caCert
+      cert: cert
+      key: key
+      tlsVerify: true
+      tlsConfig: null
+    tcpListen:
+      listen: 0.0.0.0
+      port: 65000
+
+upload:
+  rateLimit: 100Mi
+  security:
+    insecure: true
+    caCert: caCert
+    cert: cert
+    key: key
+    tlsVerify: true
+  tcpListen:
+    listen: 0.0.0.0
+    port: 65002
+
+storage:
+  dataPath: /tmp/storage/data
+  taskExpireTime: 3m0s
+  strategy: io.d7y.storage.v2.simple
+
+proxy:
+  security:
+    insecure: true
+    caCert: caCert
+    cert: cert
+    key: key
+    tlsVerify: true
+    tlsConfig: null
+  tcpListen:
+    listen: 0.0.0.0
+    port: 65001
+  registryMirror:
+    url: https://index.docker.io
+    insecure: true
+    direct: false
+  proxies:
+    - regx: blobs/sha256.*
+      useHTTPS: false
+      direct: false
+      redirect: d7y.io
+  hijackHTTPS:
+    cert: cert
+    key: key
+    hosts:
+      - regx: mirror.aliyuncs.com:443
+        insecure: true

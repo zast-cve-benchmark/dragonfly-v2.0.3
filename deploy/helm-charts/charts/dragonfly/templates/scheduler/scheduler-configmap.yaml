@@ -1,0 +1,60 @@
+{{- if .Values.scheduler.enable }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "dragonfly.scheduler.fullname" . }}
+  labels:
+    app: {{ template "dragonfly.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    component: {{ .Values.scheduler.name }}
+data:
+  scheduler.yaml: |-
+    server:
+      port: {{ .Values.scheduler.containerPort }}
+      cacheDir: {{ .Values.scheduler.config.server.cacheDir }}
+      logDir: {{ .Values.scheduler.config.server.logDir }}
+    scheduler:
+{{ toYaml .Values.scheduler.config.scheduler | indent 6 }}
+    dynconfig:
+{{ toYaml .Values.scheduler.config.dynconfig | indent 6 }}
+    host:
+{{ toYaml .Values.scheduler.config.host | indent 6 }}
+    manager:
+      {{- if .Values.manager.enable }}
+      addr: {{ template "dragonfly.manager.fullname" . }}.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}:{{ .Values.manager.grpcPort }}
+      {{- else }}
+      addr: {{ .Values.externalManager.host }}:{{ .Values.externalManager.grpcPort }}
+      {{- end }}
+      schedulerClusterID: {{ .Values.scheduler.config.manager.schedulerClusterID }}
+      keepAlive:
+{{ toYaml .Values.scheduler.config.manager.keepAlive | indent 8 }}
+    seedPeer:
+{{ toYaml .Values.scheduler.config.seedPeer | indent 6 }}
+    job:
+      redis:
+        {{- if .Values.redis.enable }}
+        password: {{ .Values.redis.auth.password }}
+        host: {{ .Release.Name }}-{{ default "redis" .Values.redis.fullname }}-master.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}
+        port: {{ .Values.redis.master.service.ports.redis }}
+        {{- else }}
+        password: {{ .Values.externalRedis.password }}
+        host: {{ .Values.externalRedis.host }}
+        port: {{ .Values.externalRedis.port }}
+        {{- end }}
+    metrics:
+      enable: {{ .Values.scheduler.metrics.enable }}
+      addr: ":8000"
+      enablePeerHost: {{ .Values.scheduler.metrics.enablePeerHost }}
+    console: {{ .Values.scheduler.config.console }}
+    verbose: {{ .Values.scheduler.config.verbose }}
+    {{- if .Values.scheduler.config.verbose }}
+    pprof-port: {{ .Values.scheduler.config.pprofPort }}
+    {{- end }}
+    {{- if .Values.scheduler.config.jaeger }}
+    jaeger: {{ .Values.scheduler.config.jaeger }}
+    {{- else if .Values.jaeger.enable }}
+    jaeger: http://{{ $.Release.Name }}-jaeger-collector.{{ $.Release.Namespace }}.svc.{{ $.Values.clusterDomain }}:14268/api/traces
+    {{- end }}
+{{- end }}

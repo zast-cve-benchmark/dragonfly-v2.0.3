@@ -1,0 +1,14 @@
+# Minimal Dockerfile using pre-compiled binary with debian base for glibc
+FROM mirror.gcr.io/library/debian:bookworm-slim
+
+WORKDIR /opt/dragonfly
+
+# Copy pre-compiled binary
+COPY dragonfly-binary /opt/dragonfly/bin/server
+
+RUN mkdir -p /opt/dragonfly/bin/manager/console \
+    && chmod +x /opt/dragonfly/bin/server
+
+EXPOSE 8080 65003
+
+ENTRYPOINT ["/opt/dragonfly/bin/server"]

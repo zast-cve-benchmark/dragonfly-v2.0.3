@@ -1,0 +1,62 @@
+{{- if .Values.manager.enable }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "dragonfly.manager.fullname" . }}
+  labels:
+    app: {{ template "dragonfly.fullname" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    component: {{ .Values.manager.name }}
+data:
+  manager.yaml: |-
+    server:
+      rest:
+        addr: :{{ .Values.manager.restPort }}
+      grpc:
+        port:
+          start: {{ .Values.manager.grpcPort }}
+          end: {{ .Values.manager.grpcPort }}
+    database:
+      mysql:
+        {{- if and .Values.mysql.enable (empty .Values.externalMysql.host)}}
+        user: {{ .Values.mysql.auth.username }}
+        password: {{ .Values.mysql.auth.password }}
+        host: {{ .Release.Name }}-{{ default "mysql" .Values.mysql.fullname }}.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}
+        port: {{ .Values.mysql.primary.service.port }}
+        dbname: {{ .Values.mysql.auth.database }}
+        migrate: {{ .Values.mysql.migrate }}
+        {{- else }}
+        user: {{ .Values.externalMysql.username }}
+        password: {{ .Values.externalMysql.password }}
+        host: {{ .Values.externalMysql.host }}
+        port: {{ .Values.externalMysql.port }}
+        dbname: {{ .Values.externalMysql.database }}
+        migrate: {{ .Values.externalMysql.migrate }}
+        {{- end }}
+      redis:
+        {{- if and .Values.redis.enable (empty .Values.externalRedis.host) }}
+        password: {{ .Values.redis.auth.password }}
+        host: {{ .Release.Name }}-{{ default "redis" .Values.redis.fullname }}-master.{{ .Release.Namespace }}.svc.{{ .Values.clusterDomain }}
+        port: {{ .Values.redis.master.service.ports.redis }}
+        {{- else }}
+        password: {{ .Values.externalRedis.password }}
+        host: {{ .Values.externalRedis.host }}
+        port: {{ .Values.externalRedis.port }}
+        {{- end }}
+    {{- if .Values.manager.metrics.enable }}
+    metrics:
+      addr: ":8000"
+    {{- end }}
+    console: {{ .Values.manager.config.console }}
+    verbose: {{ .Values.manager.config.verbose }}
+    {{- if .Values.manager.config.verbose }}
+    pprof-port: {{ .Values.manager.config.pprofPort }}
+    {{- end }}
+    {{- if .Values.manager.config.jaeger }}
+    jaeger: {{ .Values.manager.config.jaeger }}
+    {{- else if .Values.jaeger.enable }}
+    jaeger: http://{{ $.Release.Name }}-jaeger-collector.{{ $.Release.Namespace }}.svc.{{ $.Values.clusterDomain }}:14268/api/traces
+    {{- end }}
+{{- end }}

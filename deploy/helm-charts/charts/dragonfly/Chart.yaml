@@ -1,0 +1,56 @@
+apiVersion: v2
+name: dragonfly
+description: Dragonfly is an intelligent P2P based image and file distribution system
+icon: https://raw.githubusercontent.com/dragonflyoss/Dragonfly2/main/docs/images/logo/dragonfly.svg
+type: application
+version: 0.6.0
+appVersion: 0.6.0
+keywords:
+  - dragonfly
+  - d7y
+  - P2P
+  - image
+
+maintainers:
+  - name: jim3ma
+    email: majinjing3@gmail.com
+  - name: gaius-qi
+    email: gaius.qi@gmail.com
+  - name: yxxhero
+    email: aiopsclub@163.com
+
+home: https://d7y.io/
+
+sources:
+  - https://github.com/dragonflyoss/Dragonfly2
+
+annotations:
+  artifacthub.io/changes: |
+    - Update dragonfly image version to v2.0.3
+
+  artifacthub.io/links: |
+    - name: Chart Source
+      url: https://github.com/dragonflyoss/helm-charts
+    - name: Source
+      url: https://github.com/dragonflyoss/Dragonfly2
+  artifacthub.io/images: |
+    - name: manager
+      image: dragonflyoss/manager:v2.0.3
+    - name: dfdaemon
+      image: dragonflyoss/dfdaemon:v2.0.3
+    - name: scheduler
+      image: dragonflyoss/scheduler:v2.0.3
+
+dependencies:
+  - name: mysql
+    version: 9.1.2
+    repository: https://charts.bitnami.com/bitnami
+    condition: mysql.enable
+  - name: redis
+    version: 16.10.1
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enable
+  - name: jaeger
+    version: 0.56.5
+    repository: https://jaegertracing.github.io/helm-charts
+    condition: jaeger.enable

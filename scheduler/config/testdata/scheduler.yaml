@@ -1,0 +1,60 @@
+server:
+  ip: 127.0.0.1
+  host: foo
+  listen: 0.0.0.0
+  port: 8002
+  cacheDir: foo
+  logDir: bar
+
+scheduler:
+  algorithm: default
+  backSourceCount: 3
+  retryBackSourceLimit: 2
+  retryLimit: 10
+  retryInterval: 1000000000
+  gc:
+    peerGCInterval: 60000000000
+    peerTTL: 300000000000
+    taskGCInterval: 60000000000
+    taskTTL: 600000000000
+    hostGCInterval: 60000000000
+    hostTTL: 600000000000
+
+dynconfig:
+  refreshInterval: 300000000000
+
+host:
+  idc: foo
+  netTopology: bar
+  location: baz
+
+manager:
+  addr: 127.0.0.1:65003
+  schedulerClusterID: 1
+  keepAlive:
+    interval: 5000000000
+
+seedPeer:
+  enable: true
+
+job:
+  enable: true
+  globalWorkerNum: 1
+  schedulerWorkerNum: 1
+  localWorkerNum: 5
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: foo
+    brokerDB: 1
+    backendDB: 2
+
+storage:
+  maxSize: 1
+  maxBackups: 1
+  bufferSize: 1
+
+metrics:
+  enable: false
+  addr: ":8000"
+  enablePeerHost: false
